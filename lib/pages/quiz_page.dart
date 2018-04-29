@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/question.dart';
 import '../models/quiz.dart';
+import './score_page.dart';
 
 import '../UI/answer_button.dart';
 import '../UI/question_text.dart';
@@ -39,9 +40,7 @@ class QuizPageState extends State<QuizPage> {
     // TODO: implement initState
     super.initState();
 
-    currentQuestion = quiz.nextQuestion;
-    // questionText = currentQuestion.question;
-    // questionNumber = quiz.questionNumber;
+    currentQuestion = quiz.nextQuestion;    
   }
 
   @override
@@ -55,15 +54,23 @@ class QuizPageState extends State<QuizPage> {
           new QuestionText(currentQuestion.question, quiz.questionNumber),
           new AnswerButton(false, () => handleAnswer(false)),
         ]),
-        overLayVisible ? new CorrectWrongOverlay(
-          isCorrect,
-          () {
-            currentQuestion = quiz.nextQuestion;
-            this.setState(() {
-              overLayVisible = false;
-            });
-          }
-          ) : new Container()
+        overLayVisible
+            ? new CorrectWrongOverlay(isCorrect, () {
+                if (quiz.length == quiz.questionNumber) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      new MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              new ScorePage(quiz.score, quiz.length)),
+                      (Route route) => route == null);
+                  return;
+                }
+
+                currentQuestion = quiz.nextQuestion;
+                this.setState(() {
+                  overLayVisible = false;
+                });
+              })
+            : new Container()
       ],
     );
   }
